@@ -33,3 +33,13 @@ $$
 - **Altitude-Adaptive Dynamic Scaling Across All 3D Scene Elements & Rover Model:** All 3D points, waypoints (Start [A], CP 1..N, Goal [B], candidate corridor branch points), landing site beacons, custom pins, South Pole cold-trap landmarks, sub-solar/sub-earth ephemeris markers, orbital satellites, and the articulated 3D lunar rover model dynamically interpolate their scale based on camera distance $\text{camDist}$:
   $$\text{pointScale} = \operatorname{clamp}\left(\frac{\text{camDist} - 1.0}{1.35},\, 0.18,\, 1.0\right)$$
   When zoomed into the lunar surface ($\text{camDist} \le 1.25$), elements smoothly shrink to **20%** of their base size (preventing oversized 50 km spheres or giant rovers from obscuring fine crater floors and ridge crests). Full-size invisible hit targets ($r = 0.009$) and invariant screen-pixel HTML buttons (`-translate-y-*`) remain effortless to click and read at any zoom level, while the GPU shader radar ring and pulse shrink in exact 1:1 synchrony.
+
+---
+
+## Hybrid Live NASA Moon Trek OGC WMTS Dynamic Tile Streaming (`src/engine/wmtsTileStreamer.ts`)
+
+Instead of storing multi-gigabyte global mosaics on disk, `SELENE OPS` keeps the **dedicated local 3-tier South Polar Stereographic clipmap pyramid** completely intact for the South Pole (`78°S–90°S`) and pairs it with **Google Maps–style Quadtree Tile Streaming** over NASA Moon Trek's keyless, CORS-enabled WMTS endpoints (`https://trek.nasa.gov/tiles/Moon/...`) for the rest of the Moon:
+
+- **Viewport-Driven $4 \times 4$ Clipmap (`1024 × 1024 px` in RAM):** Every `~100 ms`, `WmtsTileStreamer.updateView()` determines the camera's ground focus `(lat, lon)` and altitude `camDist`. When zoomed in outside the South Pole (`lat > -76°`), it selects the matching WMTS zoom level `z` (`4..8`) and `4 × 4` tile window (with spatial hysteresis), fetches `256 × 256` tiles via a `192`-entry LRU cache, and atomically updates `uLiveTileTex` and `uLiveTileBounds` in `FRAGMENT_SHADER`.
+- **Global Equirectangular (`EQ`, `EPSG:104903`, `z = 4..8`):** Streams `EQ/LRO_WAC_Mosaic_Global_303ppd_v02` (`~83–100 m/px`) seamlessly across Apollo landing sites, Maria, Highlands, Tycho, Aristarchus, and Far-Side SPA with antimeridian (`±180°`) wrap support, feathering out cleanly before `78°S` so the local South Pole mosaics remain 100% pure.
+- **Zero-Pop Hierarchical Fallback:** While zoomed tiles download asynchronously (up to 8 concurrent requests), cached parent zoom levels (`z - 1, z - 2, ...`) are sub-quadrant blitted immediately so terrain sharpens progressively without black frames. Can be toggled live via **NASA WMTS Live** in the **Layers & Maps** sidebar (`App.tsx`).

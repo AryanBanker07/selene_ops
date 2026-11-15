@@ -1,4 +1,4 @@
-import { RoverParams, RoverTraversePlan, TraverseWaypoint } from '../types/lunar';
+  import { RoverParams, RoverTraversePlan, TraverseWaypoint } from '../types/lunar';
 
 export interface PlotConfig {
   roverName: string;

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { OptimalWindowRecommendation, TimelineSample } from '../types/lunar';
 
 interface SynodicTimelineDrawerProps {
@@ -56,44 +56,43 @@ export const SynodicTimelineDrawer: React.FC<SynodicTimelineDrawerProps> = ({
   };
 
   return (
-    <div className="hud-panel rounded-xl px-3.5 py-2.5 pointer-events-auto">
+    <div className="px-3 py-2 pointer-events-auto">
       {/* Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="hud-btn flex items-center gap-1.5 text-xs font-display uppercase tracking-[0.12em] text-slate-200 hover:text-[#fcd34d] cursor-pointer"
+            className="hud-btn flex items-center gap-1.5 text-xs font-semibold text-[#ECEEF2] hover:text-white cursor-pointer"
           >
             {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
             <span>30-Day Synodic Access Timeline</span>
           </button>
-          <span className="hidden sm:inline text-[11px] font-mono-tech text-slate-400">
-            [{siteName}]
+          <span className="hidden sm:inline text-xs text-[#9BA1AE]">
+            {siteName}
           </span>
         </div>
 
         {/* 30-Day Aggregate Duty Metrics + Jump to Optimal Touchdown */}
-        <div className="flex flex-wrap items-center gap-2.5 text-[11px] font-mono-tech">
-          <span className="px-2 py-0.5 rounded bg-[#f59e0b]/12 border border-[#f59e0b]/30 text-[#fcd34d]">
-            ☉ 30d Sun: {sunPct}%
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono-tech">
+          <span className="px-2 py-0.5 rounded bg-[#181B22] border border-white/[0.08] text-[#ECEEF2]">
+            Sun {sunPct}%
           </span>
-          <span className="px-2 py-0.5 rounded bg-[#38bdf8]/12 border border-[#38bdf8]/30 text-[#7dd3fc]">
-            ⊕ 30d DTE: {dtePct}%
+          <span className="px-2 py-0.5 rounded bg-[#181B22] border border-white/[0.08] text-[#ECEEF2]">
+            DTE {dtePct}%
           </span>
-          <span className="px-2 py-0.5 rounded bg-emerald-500/12 border border-emerald-500/30 text-emerald-300">
-            ⇄ DTE+Relay: {commTotalPct}%
+          <span className="px-2 py-0.5 rounded bg-[#181B22] border border-white/[0.08] text-[#ECEEF2]">
+            Relay {commTotalPct}%
           </span>
 
           {optimalWindows.length > 0 && (
             <button
               type="button"
               onClick={() => onScrubTime(optimalWindows[0].startMs + 6 * 3600 * 1000)}
-              className="hud-btn flex items-center gap-1 px-2.5 py-0.5 rounded bg-[#f59e0b] text-[#05070b] font-semibold hover:bg-[#fbbf24] cursor-pointer"
+              className="hud-btn px-2.5 py-0.5 rounded bg-[#ECEEF2] text-[#0A0B0E] font-medium hover:bg-white cursor-pointer"
               title={optimalWindows[0].rationale}
             >
-              <Sparkles className="w-3 h-3" />
-              <span>Best Window ({optimalWindows[0].durationHours}h)</span>
+              Best Window ({optimalWindows[0].durationHours}h)
             </button>
           )}
 
@@ -101,7 +100,7 @@ export const SynodicTimelineDrawer: React.FC<SynodicTimelineDrawerProps> = ({
             <button
               type="button"
               onClick={onSwitchToRover}
-              className="hud-btn px-2 py-0.5 rounded bg-white/[0.07] hover:bg-white/[0.14] border border-white/15 text-slate-300 cursor-pointer"
+              className="hud-btn px-2 py-0.5 rounded bg-[#181B22] hover:bg-[#1C2029] border border-white/[0.1] text-[#9BA1AE] hover:text-[#ECEEF2] cursor-pointer"
             >
               Rover Chart
             </button>
@@ -111,13 +110,13 @@ export const SynodicTimelineDrawer: React.FC<SynodicTimelineDrawerProps> = ({
 
       {expanded && (
         <div className="mt-2.5 select-none">
-          <div className="grid grid-cols-[108px_1fr] gap-2 items-center">
+          <div className="grid grid-cols-[100px_1fr] gap-2 items-center">
             {/* Track Labels */}
-            <div className="space-y-1.5 text-[10px] font-mono-tech text-slate-400 pr-1">
-              <div className="h-3.5 flex items-center text-[#fcd34d]">☉ SOLAR POWER</div>
-              <div className="h-3.5 flex items-center text-[#7dd3fc]">⊕ EARTH DTE</div>
-              <div className="h-3.5 flex items-center text-emerald-300">⇄ RELAY ORBITS</div>
-              <div className="h-4 flex items-center text-rose-300">🌡 TEMP (K)</div>
+            <div className="space-y-1.5 text-[11px] text-[#9BA1AE] pr-1">
+              <div className="h-3.5 flex items-center">Solar Power</div>
+              <div className="h-3.5 flex items-center">Earth DTE</div>
+              <div className="h-3.5 flex items-center">Relay Orbits</div>
+              <div className="h-4 flex items-center">Temp (K)</div>
             </div>
 
             {/* Interactive Scrubbing Canvas / SVG */}
@@ -204,8 +203,8 @@ export const SynodicTimelineDrawer: React.FC<SynodicTimelineDrawerProps> = ({
           </div>
 
           {/* Date Axis Labels */}
-          <div className="grid grid-cols-[108px_1fr] gap-2 mt-1">
-            <div className="text-[9px] font-mono-tech text-slate-500">CLICK / DRAG</div>
+          <div className="grid grid-cols-[100px_1fr] gap-2 mt-1">
+            <div className="text-[10px] font-mono-tech text-[#6C7280]">Drag to scrub</div>
             <div className="flex justify-between text-[10px] font-mono-tech text-slate-400">
               <span>{formatShortUtc(startMs)}</span>
               <span>+7.5d</span>

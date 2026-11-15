@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Calendar, Sun, Radio, Mountain, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Mountain, Radio, ShieldCheck, Sun } from 'lucide-react';
 import {
   OptimalWindowRecommendation,
   SatellitePassWindow,
@@ -26,158 +26,133 @@ export const AiMissionAdvisor: React.FC<AiMissionAdvisorProps> = ({
     ? evaluation.solarFluxVerticalMastWm2
     : evaluation.solarFluxHorizontalWm2;
   const relayPasses = passes.filter((p) => p.isRelay);
-
   const topWindow = optimalWindows[0];
 
   return (
-    <div className="pt-2.5 border-t border-white/[0.07] space-y-2">
-      {/* Header & Status Indicator */}
+    <div className="pt-3 border-t border-white/[0.08] space-y-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#38bdf8]" />
-          <span className="text-[11px] font-display uppercase tracking-[0.12em] text-slate-200 font-semibold">
-            Flight Readiness & Windows
+          <ShieldCheck className="w-4 h-4 text-[#9BA1AE]" />
+          <span className="text-xs font-semibold text-[#ECEEF2]">
+            Flight Windows &amp; Subsystem Summary
           </span>
         </div>
         <span
-          className={`text-[10px] font-mono-tech px-2 py-0.5 rounded border font-semibold ${
+          className={`text-[11px] font-mono-tech px-2 py-0.5 rounded border font-medium ${
             evaluation.overallStatus === 'GO'
-              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+              ? 'bg-emerald-500/10 border-emerald-500/35 text-emerald-300'
               : evaluation.overallStatus === 'CAUTION'
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-              : 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+              ? 'bg-amber-500/10 border-amber-500/35 text-amber-300'
+              : 'bg-rose-500/10 border-rose-500/35 text-rose-300'
           }`}
         >
           {evaluation.overallStatus} ({evaluation.readinessScore}/100)
         </span>
       </div>
 
-      {/* Primary Recommended Touchdown Window Card */}
       {topWindow ? (
-        <div className="p-2.5 rounded-lg bg-[#38bdf8]/[0.06] border border-[#38bdf8]/25 flex items-center justify-between gap-2">
-          <div className="text-[10px] leading-tight min-w-0">
-            <div className="flex items-center gap-1 font-mono-tech text-[#7dd3fc] font-semibold">
-              <Calendar className="w-3 h-3 text-[#38bdf8] shrink-0" />
-              <span>
-                Recommended Epoch: {topWindow.durationHours}h Continuous Sunlight
-              </span>
+        <div className="p-2.5 rounded-lg bg-[#181B22] border border-white/[0.08] flex items-center justify-between gap-2.5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#ECEEF2]">
+              <Calendar className="w-3.5 h-3.5 text-[#E59934] shrink-0" />
+              <span>Optimal Window: {topWindow.durationHours}h continuous sun</span>
             </div>
-            <div className="text-slate-400 mt-1 font-mono-tech text-[9.5px]">
-              {new Date(topWindow.startMs).toISOString().slice(0, 16).replace('T', ' ')}Z •{' '}
-              DTE {topWindow.dteCoveragePct}% • Relay {topWindow.relayCoveragePct}%
+            <div className="text-[#9BA1AE] mt-1 font-mono-tech text-[11px]">
+              {new Date(topWindow.startMs).toISOString().slice(0, 16).replace('T', ' ')}Z · DTE{' '}
+              {topWindow.dteCoveragePct}% · Relay {topWindow.relayCoveragePct}%
             </div>
           </div>
           <button
             type="button"
             onClick={() => onJumpToTime(topWindow.startMs + 6 * 3600 * 1000)}
-            className="hud-btn shrink-0 px-2.5 py-1 rounded bg-[#38bdf8] text-[#05070b] font-mono-tech font-bold text-[10px] hover:bg-[#7dd3fc] cursor-pointer flex items-center gap-1 shadow-sm"
+            className="hud-btn shrink-0 px-2.5 py-1.5 rounded-md bg-[#ECEEF2] text-[#0A0B0E] hover:bg-white font-medium text-xs cursor-pointer flex items-center gap-1"
           >
-            <Sparkles className="w-3 h-3" />
+            <Clock className="w-3 h-3" />
             <span>Warp</span>
           </button>
         </div>
       ) : (
-        <div className="p-2 rounded-lg bg-white/[0.02] border border-white/10 text-[10px] text-slate-400">
-          Permanent shadow region — solar touchdown unavailable. RTG / nuclear power required.
+        <div className="p-2.5 rounded-lg bg-[#181B22] border border-white/[0.08] text-xs text-[#9BA1AE]">
+          Permanent shadow region — solar touchdown unavailable. RTG power required.
         </div>
       )}
 
-      {/* Category Toggle Tabs */}
-      <div className="grid grid-cols-3 gap-1 p-0.5 rounded bg-black/30 border border-white/[0.08] text-[10px] font-mono-tech">
-        <button
-          type="button"
-          onClick={() => setActiveCategory('overview')}
-          className={`py-1 rounded text-center cursor-pointer transition-colors ${
-            activeCategory === 'overview'
-              ? 'bg-white/10 text-white font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Synthesis
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('comms')}
-          className={`py-1 rounded text-center cursor-pointer transition-colors ${
-            activeCategory === 'comms'
-              ? 'bg-white/10 text-white font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Comms
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategory('power')}
-          className={`py-1 rounded text-center cursor-pointer transition-colors ${
-            activeCategory === 'power'
-              ? 'bg-white/10 text-white font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Power/Thermal
-        </button>
+      <div className="grid grid-cols-3 gap-1 p-0.5 rounded-lg bg-[#0A0B0E] border border-white/[0.08] text-xs">
+        {[
+          { id: 'overview' as const, label: 'Synthesis' },
+          { id: 'comms' as const, label: 'Comms' },
+          { id: 'power' as const, label: 'Power' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveCategory(tab.id)}
+            className={`py-1.5 rounded-md text-center cursor-pointer transition-colors ${
+              activeCategory === tab.id
+                ? 'bg-[#181B22] text-[#ECEEF2] font-medium'
+                : 'text-[#9BA1AE] hover:text-[#ECEEF2]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Detailed Analysis Output Card */}
-      <div className="bg-[#060911] rounded-lg border border-white/10 p-2.5 text-[10.5px] leading-relaxed space-y-1.5 font-mono-tech">
+      <div className="bg-[#0A0B0E] rounded-lg border border-white/[0.08] p-3 text-xs leading-relaxed space-y-2 text-[#9BA1AE]">
         {activeCategory === 'overview' && (
-          <div className="space-y-1.5">
-            <div className="flex items-start gap-1.5 text-slate-300">
-              <Mountain className="w-3.5 h-3.5 text-[#38bdf8] shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <Mountain className="w-3.5 h-3.5 text-[#9BA1AE] shrink-0 mt-0.5" />
               <div>
-                <span className="text-white font-semibold">Terrain:</span> Elev{' '}
-                {evaluation.elevationKm >= 0 ? '+' : ''}
-                {evaluation.elevationKm.toFixed(2)} km • Slope {evaluation.slopeDeg.toFixed(1)}° (
-                {evaluation.slopeDeg <= 8 ? (
-                  <span className="text-emerald-400">Safe &lt;8°</span>
-                ) : (
-                  <span className="text-amber-400">Hazard &gt;8°</span>
-                )}
-                )
+                <span className="text-[#ECEEF2] font-medium">Terrain:</span>{' '}
+                <span className="font-mono-tech">
+                  {evaluation.elevationKm >= 0 ? '+' : ''}
+                  {evaluation.elevationKm.toFixed(2)} km
+                </span>{' '}
+                · Slope{' '}
+                <span className="font-mono-tech text-[#ECEEF2]">
+                  {evaluation.slopeDeg.toFixed(1)}°
+                </span>{' '}
+                ({evaluation.slopeDeg <= 8 ? 'Within <8° flight rule' : 'Exceeds 8° caution'})
               </div>
             </div>
-            <div className="flex items-start gap-1.5 text-slate-300">
-              <Sun className="w-3.5 h-3.5 text-[#fbbf24] shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2">
+              <Sun className="w-3.5 h-3.5 text-[#9BA1AE] shrink-0 mt-0.5" />
               <div>
-                <span className="text-white font-semibold">Illumination:</span>{' '}
-                {evaluation.sun.isVisible ? (
-                  <span className="text-amber-300">Sunlit (+{evaluation.sun.elevationDeg.toFixed(1)}°)</span>
-                ) : (
-                  <span className="text-slate-400">Shadowed</span>
-                )}{' '}
-                • {evaluation.illuminationDutyPct}% annual duty • {evaluation.surfaceTempK} K
+                <span className="text-[#ECEEF2] font-medium">Illumination:</span>{' '}
+                {evaluation.sun.isVisible
+                  ? `Sunlit (+${evaluation.sun.elevationDeg.toFixed(1)}°)`
+                  : 'Local shadow'}{' '}
+                · <span className="font-mono-tech">{evaluation.illuminationDutyPct}%</span> duty ·{' '}
+                <span className="font-mono-tech">{evaluation.surfaceTempK} K</span>
               </div>
             </div>
-            <div className="flex items-start gap-1.5 text-slate-300">
-              <Radio className="w-3.5 h-3.5 text-[#34d399] shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2">
+              <Radio className="w-3.5 h-3.5 text-[#9BA1AE] shrink-0 mt-0.5" />
               <div>
-                <span className="text-white font-semibold">Comms:</span>{' '}
-                {evaluation.earth.isVisible ? (
-                  <span className="text-emerald-300">DTE Open (+{evaluation.earth.elevationDeg.toFixed(1)}°)</span>
-                ) : (
-                  <span className="text-amber-300">DTE Masked</span>
-                )}{' '}
-                • {evaluation.visibleRelays.length} active relay(s) in line-of-sight
+                <span className="text-[#ECEEF2] font-medium">Comms:</span>{' '}
+                {evaluation.earth.isVisible
+                  ? `DTE Open (+${evaluation.earth.elevationDeg.toFixed(1)}°)`
+                  : 'DTE Masked'}{' '}
+                · {evaluation.visibleRelays.length} active relay(s) in view
               </div>
             </div>
           </div>
         )}
 
         {activeCategory === 'comms' && (
-          <div className="text-slate-300 space-y-1">
-            <div className="text-white font-semibold flex items-center gap-1">
-              <Radio className="w-3 h-3 text-[#34d399]" />
-              <span>Direct-to-Earth (DTE) & Cislunar Relays</span>
+          <div className="space-y-1.5">
+            <div className="text-[#ECEEF2] font-medium">
+              Direct-to-Earth (DTE) &amp; Cislunar Relays
             </div>
             <p>
-              • DTE Status:{' '}
+              DTE Status:{' '}
               {evaluation.earth.isVisible
-                ? `OPEN at +${evaluation.earth.elevationDeg.toFixed(1)}° (clearing +${evaluation.earth.horizonDeg.toFixed(1)}° rim)`
-                : `BLOCKED (Earth at ${evaluation.earth.elevationDeg.toFixed(1)}° vs +${evaluation.earth.horizonDeg.toFixed(1)}° mask)`}
+                ? `Open at +${evaluation.earth.elevationDeg.toFixed(1)}° (clearing +${evaluation.earth.horizonDeg.toFixed(1)}° rim)`
+                : `Blocked (${evaluation.earth.elevationDeg.toFixed(1)}° vs +${evaluation.earth.horizonDeg.toFixed(1)}° rim)`}
             </p>
             <p>
-              • Active Constellation:{' '}
+              Active Constellation:{' '}
               {evaluation.visibleRelays.length > 0
                 ? evaluation.visibleRelays
                     .map(
@@ -193,23 +168,21 @@ export const AiMissionAdvisor: React.FC<AiMissionAdvisorProps> = ({
         )}
 
         {activeCategory === 'power' && (
-          <div className="text-slate-300 space-y-1">
-            <div className="text-white font-semibold flex items-center gap-1">
-              <Sun className="w-3 h-3 text-[#fbbf24]" />
-              <span>Solar Irradiance & Thermal Environment</span>
-            </div>
+          <div className="space-y-1.5">
+            <div className="text-[#ECEEF2] font-medium">Solar Irradiance &amp; Thermal State</div>
             <p>
-              • Solar Flux: {bestFlux.toFixed(0)} W/m² (
+              Solar Flux:{' '}
+              <span className="font-mono-tech text-[#ECEEF2]">{bestFlux.toFixed(0)} W/m²</span> (
               {evaluation.sun.isVisible
                 ? `El +${evaluation.sun.elevationDeg.toFixed(1)}°`
                 : 'Local Shadow'}
-              ) • Temp {evaluation.surfaceTempK} K
+              ) · Temp <span className="font-mono-tech">{evaluation.surfaceTempK} K</span>
             </p>
             <p>
-              • Architecture: {isPolar ? 'Vertical 1-axis tracking mast' : 'Horizontal solar deck'} (
+              Array Configuration: {isPolar ? 'Vertical 1-axis tracking mast' : 'Horizontal deck'} (
               {evaluation.illuminationDutyPct >= 75
-                ? 'High polar ridge duty limits continuous eclipse <55h'
-                : 'Requires battery reserve or RHUs for eclipse'}
+                ? 'High polar duty limits eclipse under 55h'
+                : 'Requires battery reserve or RHU thermal survival'}
               )
             </p>
           </div>

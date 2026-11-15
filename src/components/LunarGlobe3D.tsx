@@ -10,6 +10,7 @@ import {
   solveNextSatelliteOrbitPointTime,
 } from '../engine/selenography';
 import { formatWarpDelta } from '../engine/celestialEphemeris';
+import { WmtsStreamStatus, WmtsTileStreamer } from '../engine/wmtsTileStreamer';
 import {
   CandidateCorridorPath,
   HeatmapMode,
@@ -209,6 +210,10 @@ const FRAGMENT_SHADER = /* glsl */ `
   uniform sampler2D uSpWideColor;
   uniform sampler2D uSpArtemisColor;
   uniform sampler2D uSpInnerColor;
+  uniform sampler2D uLiveTileTex;
+  uniform vec4 uLiveTileBounds;
+  uniform int uLiveTileMode;
+  uniform float uLiveTileStrength;
   ${POLAR_SAMPLER_GLSL}
   uniform int uMode;
   uniform vec3 uSunDir;
@@ -229,28 +234,45 @@ const FRAGMENT_SHADER = /* glsl */ `
 
   vec3 sampleUnifiedAlbedo(vec3 dir, vec2 baseUv) {
     vec3 col = texture2D(uColorMap, baseUv).rgb;
-    if (dir.y > -0.974) return col;
+    if (dir.y <= -0.974) {
+      vec2 spMeters = (3474800.0 / max(0.5, 1.0 - dir.y)) * vec2(-dir.z, dir.x);
+      float spRad = length(spMeters);
+      if (spRad < 358000.0) {
+        float wWide = 1.0 - smoothstep(312000.0, 356000.0, spRad);
+        vec2 uvWide = vec2(0.5) + spMeters / 730000.0;
+        col = mix(col, texture2D(uSpWideColor, uvWide).rgb, wWide);
 
-    vec2 spMeters = (3474800.0 / max(0.5, 1.0 - dir.y)) * vec2(-dir.z, dir.x);
-    float spRad = length(spMeters);
-    if (spRad < 358000.0) {
-      float wWide = 1.0 - smoothstep(312000.0, 356000.0, spRad);
-      vec2 uvWide = vec2(0.5) + spMeters / 730000.0;
-      col = mix(col, texture2D(uSpWideColor, uvWide).rgb, wWide);
+        float spBox = max(abs(spMeters.x), abs(spMeters.y));
+        if (spBox < 152000.0) {
+          float wArt = 1.0 - smoothstep(138000.0, 151500.0, spBox);
+          vec2 uvArt = vec2(0.5) + spMeters / 310000.0;
+          col = mix(col, texture2D(uSpArtemisColor, uvArt).rgb, wArt);
 
-      float spBox = max(abs(spMeters.x), abs(spMeters.y));
-      if (spBox < 152000.0) {
-        float wArt = 1.0 - smoothstep(138000.0, 151500.0, spBox);
-        vec2 uvArt = vec2(0.5) + spMeters / 310000.0;
-        col = mix(col, texture2D(uSpArtemisColor, uvArt).rgb, wArt);
-
-        if (spBox < 35200.0) {
-          float wIn = 1.0 - smoothstep(31500.0, 35000.0, spBox);
-          vec2 uvIn = vec2(0.5) + spMeters / 72000.0;
-          col = mix(col, texture2D(uSpInnerColor, uvIn).rgb, wIn);
+          if (spBox < 35200.0) {
+            float wIn = 1.0 - smoothstep(31500.0, 35000.0, spBox);
+            vec2 uvIn = vec2(0.5) + spMeters / 72000.0;
+            col = mix(col, texture2D(uSpInnerColor, uvIn).rgb, wIn);
+          }
         }
       }
     }
+
+    // Live Google-Maps-style NASA Moon Trek OGC WMTS Dynamic Clipmap Overlay (outside South Pole)
+    if (uLiveTileStrength > 0.005 && uLiveTileMode == 2 && dir.y > -0.978) {
+      float lat = asin(clamp(dir.y, -1.0, 1.0));
+      float lon = atan(-dir.z, dir.x);
+      float dLon = mod(lon - uLiveTileBounds.x + 6.28318530718, 6.28318530718);
+      if (dLon > 3.14159265359) dLon -= 6.28318530718;
+      vec2 liveUv = vec2(dLon * uLiveTileBounds.z, (lat - uLiveTileBounds.y) * uLiveTileBounds.w);
+      if (liveUv.x > 0.01 && liveUv.x < 0.99 && liveUv.y > 0.01 && liveUv.y < 0.99) {
+        float edge = max(abs(liveUv.x - 0.5), abs(liveUv.y - 0.5));
+        float spFade = smoothstep(-0.978, -0.968, dir.y);
+        float wLive = (1.0 - smoothstep(0.36, 0.485, edge)) * uLiveTileStrength * spFade;
+        vec4 liveCol = texture2D(uLiveTileTex, liveUv);
+        col = mix(col, liveCol.rgb, wLive * liveCol.a);
+      }
+    }
+
     return col;
   }
 
@@ -591,6 +613,8 @@ interface LunarGlobe3DProps {
   onWarpToTime?: (targetTimeMs: number, label: string) => void;
   onSnapToTime?: (targetTimeMs: number) => void;
   previewSunEarthPoint?: { lat: number; lon: number; label: string } | null;
+  enableLiveWmts?: boolean;
+  onWmtsStatusChange?: (status: WmtsStreamStatus) => void;
 }
 
 interface SceneContentProps extends LunarGlobe3DProps {}
@@ -630,6 +654,8 @@ const MoonSceneContent: React.FC<SceneContentProps> = ({
   onWarpToTime,
   onSnapToTime,
   previewSunEarthPoint = null,
+  enableLiveWmts = true,
+  onWmtsStatusChange,
 }) => {
   const [
     colorMap,
@@ -696,7 +722,16 @@ const MoonSceneContent: React.FC<SceneContentProps> = ({
   const roverModelGroupRef = useRef<THREE.Group>(null);
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
   const userGrabbedDuringAnim = useRef<boolean>(false);
+  const tileStreamer = useMemo(() => new WmtsTileStreamer(), []);
+  const lastWmtsTickRef = useRef<number>(0);
+  const lastWmtsStatusKeyRef = useRef<string>('');
   const { camera } = useThree();
+
+  useEffect(() => {
+    return () => {
+      tileStreamer.dispose();
+    };
+  }, [tileStreamer]);
 
   // Smooth camera transition target
   const flyTargetCamPos = useRef<THREE.Vector3 | null>(null);
@@ -812,6 +847,10 @@ const MoonSceneContent: React.FC<SceneContentProps> = ({
       uSpWideColor: { value: spWideColor },
       uSpArtemisColor: { value: spArtemisColor },
       uSpInnerColor: { value: spInnerColor },
+      uLiveTileTex: { value: tileStreamer.texture },
+      uLiveTileBounds: { value: new THREE.Vector4(0, 0, 1, 1) },
+      uLiveTileMode: { value: 0 },
+      uLiveTileStrength: { value: 0.0 },
       uSpWideDem: { value: spWideDem },
       uSpArtemisDem: { value: spArtemisDem },
       uSpInnerDem: { value: spInnerDem },
@@ -837,6 +876,7 @@ const MoonSceneContent: React.FC<SceneContentProps> = ({
       spWideDem,
       spArtemisDem,
       spInnerDem,
+      tileStreamer,
     ]
   );
 
@@ -922,6 +962,25 @@ const MoonSceneContent: React.FC<SceneContentProps> = ({
       u.uNightBoost.value = nightBoost ? 1.0 : 0.0;
       u.uTime.value = state.clock.elapsedTime;
       u.uPinScale.value = pointScale;
+
+      // Throttle NASA Moon Trek OGC WMTS viewport updates (~10 Hz)
+      const nowMs = performance.now();
+      if (nowMs - lastWmtsTickRef.current >= 100) {
+        lastWmtsTickRef.current = nowMs;
+        const camDir = camera.position.clone().normalize();
+        const focusLL = cartesianToLatLon(camDir.x, camDir.y, camDir.z);
+        tileStreamer.updateView(focusLL.lat, focusLL.lon, camDist, enableLiveWmts);
+        if (tileStreamer.statusKey !== lastWmtsStatusKeyRef.current) {
+          lastWmtsStatusKeyRef.current = tileStreamer.statusKey;
+          onWmtsStatusChange?.(tileStreamer.getStatus());
+        }
+      }
+
+      u.uLiveTileMode.value = tileStreamer.committedMode;
+      u.uLiveTileBounds.value.set(...tileStreamer.committedBounds);
+      const targetStrength = tileStreamer.committedMode > 0 ? 1.0 : 0.0;
+      u.uLiveTileStrength.value +=
+        (targetStrength - u.uLiveTileStrength.value) * Math.min(1, delta * 6.5);
     }
 
     // Adaptive fine-grained rotation & zoom speed when zoomed closely into polar craters
