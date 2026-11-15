@@ -1,8 +1,7 @@
 # SELENE OPS — Lunar Landing Site Navigator
 
 **NASA Space Apps Challenge 2026:** [Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)  
-**Live Deployment:** [selene-ops.vercel.app](https://selene-ops.vercel.app) ([Presentation Deck](https://selene-ops.vercel.app/presentation.html))  
-**Repository:** [github.com/AryanBanker07/selene_ops](https://github.com/AryanBanker07/selene_ops)
+**Live Deployment:** [selene-ops.vercel.app](https://selene-ops.vercel.app) **Repository:** [github.com/AryanBanker07/selene_ops](https://github.com/AryanBanker07/selene_ops)
 
 ---
 
