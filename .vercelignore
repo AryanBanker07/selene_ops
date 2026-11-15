@@ -1,0 +1,14 @@
+.git
+node_modules
+dist
+vault
+scripts
+temp
+*.mp4
+*.mov
+~$*
+public/~$*
+/SELENE_OPS_SpaceApps_2026_Presentation.pptx
+/SPACEAPPS_SUBMISSION.md
+/README.md
+/DESIGN.md

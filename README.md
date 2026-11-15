@@ -1,7 +1,8 @@
 # SELENE OPS — Lunar Landing Site Navigator
 
 **NASA Space Apps Challenge 2026:** [Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)  
-**Repository:** [github.com/AryanBanker07/luna_plana](https://github.com/AryanBanker07/luna_plana)
+**Live Deployment:** [selene-ops.vercel.app](https://selene-ops.vercel.app) ([Presentation Deck](https://selene-ops.vercel.app/presentation.html))  
+**Repository:** [github.com/AryanBanker07/selene_ops](https://github.com/AryanBanker07/selene_ops)
 
 ---
 
@@ -80,8 +81,8 @@ Executed at 60 FPS inside custom WebGL vertex & fragment shaders synchronized wi
 
 ### Install & Run Locally
 ```bash
-git clone https://github.com/AryanBanker07/luna_plana.git
-cd luna_plana
+git clone https://github.com/AryanBanker07/selene_ops.git
+cd selene_ops
 npm install
 npm run dev
 ```
