@@ -13,7 +13,8 @@ Built utilizing **EVERYTHING CLAUDE CODE (ECC)** engineering patterns (`frontend
 - **UI & Landing Page Architecture:**
   - `LandingPageHero.tsx`: Single-viewport, non-scrolling Mission Launcher (`600px` centered workspace card over the live 3D Moon) with immediate operational entry buttons (`Open 3D Workspace`, `South Pole (10 m/px)`, `Rover Traverse`, `Earth–Moon`, plus `Feature Guide`), a clean interactive candidate landing site list (Slope, Solar Duty, Coordinates), and AI trope decorations/filler pills (`UTC` header pill, telemetry filler) removed.
   - `FeatureWizardModal.tsx`: Non-blocking 5-step interactive feature guide (`Sites`, `Layers`, `Readiness`, `Orbits`, `Rover`) accessible from both `LandingPageHero` and the top ribbon `Guide` button, with live 3D layer/camera/rover previews and `ArrowLeft`/`ArrowRight`/`Esc` keyboard navigation.
-  - `App.tsx` (Left-Anchored Flight Director Ribbon): 2-tier neutral top ribbon aligned along a left-to-center ergonomic spine (Fitts's Law) with 6 clean consolidated collapsible tabs (`Sites`, `Layers`, `Readiness`, `Orbits`, `Rover`, `Timeline`), decluttered Tier 2 camera/layer controls, `Guide` toggle, `Esc`-dismissible drawers anchored directly beneath the left control spine, and a transparent **"What Readiness Means"** card + 5-subsystem `0–100` scoring breakdown (`Power /30`, `Comms /26`, `Slope /20`, `Thermal /14`, `Ice & Duty /10`, with `GO >= 76` vs `NO-GO` critical gate rules) inside the `Readiness` drawer.
+  - `DraggableWindow.tsx`: Moveable, minimizable, focus-stackable window shell enabling multiple tabs (`Sites`, `Layers`, `Readiness`, `Orbits`, `Rover`, `Timeline / Synodic Forecast`) to stay open simultaneously, with double-click header reset, viewport clamping, and `Snap Layout` / `Close (n)` controls.
+  - `App.tsx` (Left-Anchored Flight Director Ribbon): 2-tier neutral top ribbon aligned along a left-to-center ergonomic spine (Fitts's Law) with 6 independent multi-window toggle tabs (`Sites`, `Layers`, `Readiness`, `Orbits`, `Rover`, `Timeline`), decluttered Tier 2 camera/layer controls, `Guide` toggle, `Esc` top-window dismissal, and a transparent **"What Readiness Means"** card + 5-subsystem `0–100` scoring breakdown (`Power /30`, `Comms /26`, `Slope /20`, `Thermal /14`, `Ice & Duty /10`, with `GO >= 76` vs `NO-GO` critical gate rules) inside the `Readiness` window.
 - **Presentation Generator:** `scripts/generate_spaceapps_presentation.py` renders 6 high-DPI NASA LOLA/LROC figures (`public/slides/slide1..6.png`), builds the 7-slide widescreen PowerPoint deck (`SELENE_OPS_SpaceApps_2026_Presentation.pptx` + `public/SELENE_OPS_SpaceApps_2026_Presentation.pptx`), and exports a zero-dependency viewport-fit interactive web deck (`public/presentation.html`).
 
 ---
@@ -33,6 +34,7 @@ Lunar landing navigator/
 │   ├── components/
 │   │   ├── LandingPageHero.tsx            # Single-Viewport Mission Launcher
 │   │   ├── FeatureWizardModal.tsx         # 5-Step Interactive Feature Guide Wizard
+│   │   ├── DraggableWindow.tsx            # Moveable Multi-Window Frame Shell (Drag, Minimize, Focus)
 │   │   ├── LunarGlobe3D.tsx               # 3D Displaced Moon, GLSL Heatmaps, Orbits & LOS Vectors
 │   │   ├── PolarHorizonSkyplot.tsx        # 360° Polar Skyplot & Linear Crater-Rim Panorama
 │   │   ├── SynodicTimelineDrawer.tsx      # 30-Day Synodic Sun/DTE/Relay/Temp Interactive Scrubber

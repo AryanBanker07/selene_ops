@@ -45,9 +45,9 @@ const WIZARD_STEPS: WizardStepDef[] = [
   {
     id: 'sites',
     shortLabel: '1. Sites',
-    title: 'Landing Sites & Hybrid 3D Terrain',
+    title: 'Landing Sites, Multi-Window HUD & Terrain',
     summary:
-      'Explore any point on the Moon by clicking directly on the 3D globe or choosing from 10 curated Artemis III, CLPS, and ISRU targets.',
+      'Click any Moon coordinate or choose from 10 curated targets. Open multiple tabs (Sites, Readiness, Timeline) simultaneously and drag any window header to arrange your workspace.',
     bullets: [
       {
         heading: 'Local 10 m/px South Pole Pyramid',
