@@ -159,6 +159,8 @@ function statusStyle(status: ReadinessStatus): {
   };
 }
 
+const FIRST_TIME_GUIDE_STORAGE_KEY = 'selene_feature_guide_seen_v1';
+
 export function App() {
   // Default mission epoch: 2026-11-04 12:00 UTC
   const [simTimeMs, setSimTimeMs] = useState<number>(() =>
@@ -277,7 +279,32 @@ export function App() {
   } | null>(null);
   const [activeWarp, setActiveWarp] = useState<ActiveTimeWarpState | null>(null);
   const [zenMode, setZenMode] = useState<boolean>(false);
-  const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
+  const [isWizardOpen, setIsWizardOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(FIRST_TIME_GUIDE_STORAGE_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    if (!isWizardOpen) return;
+    try {
+      window.localStorage.setItem(FIRST_TIME_GUIDE_STORAGE_KEY, '1');
+    } catch {
+      // Ignore storage restrictions
+    }
+  }, [isWizardOpen]);
+
+  const handleCloseWizard = () => {
+    try {
+      window.localStorage.setItem(FIRST_TIME_GUIDE_STORAGE_KEY, '1');
+    } catch {
+      // Ignore storage restrictions
+    }
+    setIsWizardOpen(false);
+  };
 
   const simTimeRef = useRef<number>(simTimeMs);
   simTimeRef.current = simTimeMs;
@@ -803,6 +830,7 @@ export function App() {
   };
 
   const handleWizardStepAction = (action: WizardStepAction) => {
+    setShowLandingPage(false);
     setZenMode(false);
     if (action.viewMode) {
       setViewMode(action.viewMode);
@@ -2307,7 +2335,12 @@ export function App() {
       {showLandingPage && (
         <LandingPageHero
           curatedSites={CURATED_LANDING_SITES}
-          onEnterConsole={() => setShowLandingPage(false)}
+          onEnterConsole={() => {
+            setShowLandingPage(false);
+            if (isWizardOpen && openTabs.length === 0) {
+              setActiveRibbonTab('sites');
+            }
+          }}
           onLaunchSouthPole={() => {
             setShowLandingPage(false);
             setViewMode('south-pole');
@@ -2346,7 +2379,7 @@ export function App() {
       {/* 5-STEP FEATURE GUIDE WIZARD */}
       <FeatureWizardModal
         isOpen={isWizardOpen}
-        onClose={() => setIsWizardOpen(false)}
+        onClose={handleCloseWizard}
         onApplyStepAction={handleWizardStepAction}
         currentHeatmap={heatmapMode}
         currentViewMode={viewMode}

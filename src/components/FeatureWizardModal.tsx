@@ -466,7 +466,10 @@ export const FeatureWizardModal: React.FC<FeatureWizardModalProps> = ({
           ) : (
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                onApplyStepAction({ stepId: step.id });
+                onClose();
+              }}
               className="hud-btn inline-flex items-center gap-1 px-3.5 py-1.5 rounded-md bg-[#ECEEF2] hover:bg-white text-[#0A0B0E] text-xs font-semibold cursor-pointer"
             >
               <span>Start Exploring</span>
