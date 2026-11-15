@@ -136,3 +136,4 @@ npm run preview
 
 - Scientific models and algorithms are anchored to official NASA PDS/PGDA datasets, ASU LROC mosaics, NASA Moon Trek WMTS endpoints, and NASA JPL ephemeris conventions.
 - AI coding assistance was used during prototyping to help scaffold TypeScript/React components, refine GLSL multi-layer blending, and structure technical documentation; all physical equations, DEM resolutions, dataset attributions, and UI behaviors were verified against source assets and browser builds.
+

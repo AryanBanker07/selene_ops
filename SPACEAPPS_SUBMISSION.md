@@ -24,9 +24,14 @@ Using a hybrid terrain architecture, SELENE OPS combines a local 3-tier South Po
 
 ---
 
-## 4. Link to Project Demo *(Choose Either 7-Slide Deck OR 30-Second Video)*
+## 4. Link to Project Demo *(Generated 7-Slide Deck Ready + Optional 30-Second Video)*
 
 Per the official Space Apps Project Submission Guide, choose **one** primary demo format and make sure its sharing link is **public (anyone with the link can view, no login wall)**:
+
+- **Ready-to-Present Deliverables Generated in Repo:**
+  - **PowerPoint Deck (16:9, 7 Slides):** [`SELENE_OPS_SpaceApps_2026_Presentation.pptx`](SELENE_OPS_SpaceApps_2026_Presentation.pptx) (also served statically at `/SELENE_OPS_SpaceApps_2026_Presentation.pptx`)
+  - **Interactive Browser Presentation:** [`public/presentation.html`](public/presentation.html) (served live at `/presentation.html`)
+  - **High-DPI Slide Figures:** [`public/slides/`](public/slides/) (`slide1_hero_composite.png` through `slide6_rover_traverse.png`), generated via [`scripts/generate_spaceapps_presentation.py`](scripts/generate_spaceapps_presentation.py)
 
 ### Option A: 7-Slide Presentation Deck Blueprint *(Max 7 Slides)*
 1. **Slide 1 — Title & Mission Hook:** `SELENE OPS // Lunar Landing Site Navigator` · 2026 NASA Space Apps Challenge · Tagline: *"3D Multi-Physics Readiness, Cislunar Relay & A* Rover Navigation from Global Moon Trek WMTS to 10 m/px South Pole Ridges."* (Hero visual: Full-screen Mission Launcher over 3D Moon).
@@ -106,3 +111,4 @@ AI coding assistants were used as development productivity tools to assist in sc
 - [ ] **Demo Format Limit Met:** Strictly **<= 7 slides** (if slide deck) OR **<= 30 seconds** (if video).
 - [ ] **Public Access Verified:** GitHub repo (`https://github.com/AryanBanker07/luna_plana`) and demo link (Google Drive / YouTube / Slides / PDF) are tested in an Incognito browser window with zero login walls.
 - [ ] **Save & Finalize:** Click **Save Progress** while editing and **Submit for Judging** before the local deadline (`11:59 PM` local time on final event day).
+

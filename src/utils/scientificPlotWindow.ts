@@ -89,10 +89,14 @@ function buildScientificHtml(
 <head>
   <meta charset="UTF-8">
   <title>SELENE OPS • Plot Data — Scientific Telemetry (${roverParams.name})</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-variant-numeric: tabular-nums;
       background-color: ${bgColor};
       color: ${textColor};
       padding: 14px;
@@ -115,13 +119,13 @@ function buildScientificHtml(
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      font-family: monospace, sans-serif;
+      font-family: "Plus Jakarta Sans", sans-serif;
     }
     .title-group p {
       font-size: 11px;
       color: ${mutedColor};
       margin-top: 2px;
-      font-family: monospace;
+      font-family: "Plus Jakarta Sans", sans-serif;
     }
     .btn-toolbar {
       display: flex;
@@ -136,7 +140,7 @@ function buildScientificHtml(
       border-radius: 4px;
       padding: 5px 10px;
       font-size: 11px;
-      font-family: monospace;
+      font-family: "Plus Jakarta Sans", sans-serif;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -165,7 +169,7 @@ function buildScientificHtml(
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
-      font-family: monospace;
+      font-family: "Plus Jakarta Sans", sans-serif;
       font-size: 11px;
     }
     .probe-item span.lbl { color: ${mutedColor}; margin-right: 4px; }
@@ -188,7 +192,7 @@ function buildScientificHtml(
       margin-top: 10px;
       font-size: 10px;
       color: ${mutedColor};
-      font-family: monospace;
+      font-family: "Plus Jakarta Sans", sans-serif;
       display: flex;
       justify-content: space-between;
     }
@@ -343,14 +347,14 @@ function buildScientificHtml(
         const tv = minV + (t / 4) * vSpan;
         const ty = mapY(tv);
         svgHtml += \`<line x1="\${padLeft}" y1="\${ty}" x2="\${padLeft + plotW}" y2="\${ty}" stroke="${borderColor}" stroke-width="0.7" stroke-dasharray="3,3" opacity="0.6"/>\`;
-        svgHtml += \`<text x="\${padLeft - 8}" y="\${ty + 3.5}" text-anchor="end" font-size="9" fill="${mutedColor}" font-family="monospace">\${tv.toFixed(qId === 'soc' || qId === 'elevation' || qId === 'energy' ? 0 : 1)}\${def.unit}</text>\`;
+        svgHtml += \`<text x="\${padLeft - 8}" y="\${ty + 3.5}" text-anchor="end" font-size="9" fill="${mutedColor}" font-family="Plus Jakarta Sans, sans-serif">\${tv.toFixed(qId === 'soc' || qId === 'elevation' || qId === 'energy' ? 0 : 1)}\${def.unit}</text>\`;
       }
 
       // Threshold line
       if (config.showThresholds && def.threshold !== null && def.threshold >= minV && def.threshold <= maxV) {
         const thY = mapY(def.threshold);
         svgHtml += \`<line x1="\${padLeft}" y1="\${thY}" x2="\${padLeft + plotW}" y2="\${thY}" stroke="#dc2626" stroke-width="1.3" stroke-dasharray="5,3"/>\`;
-        svgHtml += \`<text x="\${padLeft + plotW - 6}" y="\${thY - 4}" text-anchor="end" font-size="8.5" fill="#dc2626" font-family="monospace" font-weight="bold">\${def.thresholdLabel}</text>\`;
+        svgHtml += \`<text x="\${padLeft + plotW - 6}" y="\${thY - 4}" text-anchor="end" font-size="8.5" fill="#dc2626" font-family="Plus Jakarta Sans, sans-serif" font-weight="bold">\${def.thresholdLabel}</text>\`;
       }
 
       // Curve polyline
@@ -394,13 +398,13 @@ function buildScientificHtml(
           const cpx = mapX(xVals[bestIdx]);
           svgHtml += \`<line x1="\${cpx}" y1="\${py0}" x2="\${cpx}" y2="\${py1}" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4,2.5" opacity="0.6"/>\`;
           if (pIdx === 0) {
-            svgHtml += \`<text x="\${cpx + 3}" y="\${py0 + 10}" font-size="8" fill="#06b6d4" font-family="monospace" font-weight="bold">\${cp.label || 'CP' + (ci+1)}</text>\`;
+            svgHtml += \`<text x="\${cpx + 3}" y="\${py0 + 10}" font-size="8" fill="#06b6d4" font-family="Plus Jakarta Sans, sans-serif" font-weight="bold">\${cp.label || 'CP' + (ci+1)}</text>\`;
           }
         });
       }
 
       // Panel Y-Axis Label
-      svgHtml += \`<text x="\${padLeft + 8}" y="\${py0 + 14}" font-size="10" font-weight="bold" fill="\${def.color}" font-family="monospace">\${def.label}</text>\`;
+      svgHtml += \`<text x="\${padLeft + 8}" y="\${py0 + 14}" font-size="10" font-weight="bold" fill="\${def.color}" font-family="Plus Jakarta Sans, sans-serif">\${def.label}</text>\`;
     });
 
     // Bottom X-Axis line and ticks
@@ -413,13 +417,13 @@ function buildScientificHtml(
       const xv = minX + frac * xSpan;
       const xx = mapX(xv);
       svgHtml += \`<line x1="\${xx}" y1="\${botY}" x2="\${xx}" y2="\${botY + 5}" stroke="${textColor}" stroke-width="1"/>\`;
-      svgHtml += \`<text x="\${xx}" y="\${botY + 18}" text-anchor="middle" font-size="9.5" fill="${textColor}" font-family="monospace">\${xv.toFixed(1)}</text>\`;
+      svgHtml += \`<text x="\${xx}" y="\${botY + 18}" text-anchor="middle" font-size="9.5" fill="${textColor}" font-family="Plus Jakarta Sans, sans-serif">\${xv.toFixed(1)}</text>\`;
     }
 
     const xTitle = config.xAxis === 'time'
       ? 'Mission Elapsed Time (Hours T+)'
       : (config.xAxis === 'index' ? 'Waypoint Sample Index' : 'Cumulative Traverse Distance (km)');
-    svgHtml += \`<text x="\${padLeft + plotW / 2}" y="\${totalH - 8}" text-anchor="middle" font-size="11" font-weight="bold" fill="${textColor}" font-family="monospace">\${xTitle}</text>\`;
+    svgHtml += \`<text x="\${padLeft + plotW / 2}" y="\${totalH - 8}" text-anchor="middle" font-size="11" font-weight="bold" fill="${textColor}" font-family="Plus Jakarta Sans, sans-serif">\${xTitle}</text>\`;
 
     // Crosshair line placeholder
     svgHtml += \`<line id="crosshairLine" x1="0" y1="\${padTop}" x2="0" y2="\${botY}" stroke="#eab308" stroke-width="1.2" stroke-dasharray="3,2" style="display:none; pointer-events:none;"/>\`;

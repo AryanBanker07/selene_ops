@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SELENE OPS // NASA Space Apps 2026 Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-void: #0a0b0e;
+      --bg-surface: #12151d;
+      --bg-control: #181c26;
+      --border: rgba(255, 255, 255, 0.09);
+      --text-primary: #eceef2;
+      --text-secondary: #9ba1ae;
+      --text-muted: #6c7280;
+      --amber: #e59934;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --red: #ef4444;
+      --slide-padding: clamp(1rem, 3.2vw, 3rem);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg-void); color: var(--text-primary); font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+    .deck { height: 100dvh; width: 100vw; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+      scroll-snap-align: start; display: flex; flex-direction: column; justify-content: space-between;
+      padding: var(--slide-padding); position: relative; border-bottom: 1px solid var(--border);
+    }
+    .title-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .header { border-bottom: 1px solid var(--border); padding-bottom: clamp(0.45rem, 1vh, 0.85rem); margin-bottom: clamp(0.75rem, 1.5vh, 1.25rem); }
+    .kicker { display: inline-flex; align-items: center; gap: 0.5rem; font-size: clamp(0.68rem, 0.9vw, 0.82rem); font-weight: 700; letter-spacing: 0.08em; color: var(--amber); text-transform: uppercase; }
+    .kicker::before { content: ''; width: 4px; height: 14px; background: var(--amber); border-radius: 2px; }
+    h1 { font-size: clamp(2.1rem, 4.4vw, 3.6rem); line-height: 1.08; margin-top: 0.6rem; }
+    h2 { font-size: clamp(1.25rem, 2.4vw, 2rem); line-height: 1.2; margin-top: 0.25rem; }
+    .subtitle { font-size: clamp(0.82rem, 1.15vw, 1rem); color: var(--text-secondary); margin-top: 0.3rem; }
+    .split { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.32fr); gap: clamp(1rem, 2.2vw, 2rem); align-items: stretch; }
+    .stack { display: flex; flex-direction: column; gap: clamp(0.5rem, 1vh, 0.85rem); justify-content: center; min-height: 0; }
+    .card {
+      background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: clamp(0.6rem, 1.15vh, 0.95rem) clamp(0.75rem, 1.2vw, 1.1rem);
+      border-left: 3px solid var(--amber);
+    }
+    .card.cyan { border-left-color: var(--cyan); }
+    .card.emerald { border-left-color: var(--emerald); }
+    .card.red { border-left-color: var(--red); }
+    .card h3 { font-size: clamp(0.84rem, 1.1vw, 1rem); font-weight: 600; color: var(--text-primary); }
+    .card p { font-size: clamp(0.74rem, 0.96vw, 0.88rem); color: var(--text-secondary); line-height: 1.42; margin-top: 0.25rem; }
+    .fig-frame {
+      background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 0.55rem; display: flex; align-items: center; justify-content: center; min-height: 0; overflow: hidden;
+    }
+    .fig-frame img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 1rem; }
+    .kpi { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem; }
+    .kpi strong { display: block; font-size: clamp(1.3rem, 2.2vw, 1.9rem); font-variant-numeric: tabular-nums; }
+    .kpi span { display: block; font-size: clamp(0.7rem, 0.9vw, 0.82rem); color: var(--text-secondary); margin-top: 0.2rem; }
+    table { width: 100%; border-collapse: collapse; font-size: clamp(0.7rem, 0.92vw, 0.84rem); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { text-align: left; padding: clamp(0.4rem, 0.8vh, 0.65rem) 0.75rem; border-bottom: 1px solid var(--border); }
+    th { background: var(--bg-control); color: var(--amber); font-weight: 600; }
+    td { color: var(--text-secondary); }
+    td:first-child { color: var(--text-primary); font-weight: 600; }
+    .footer { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); padding-top: 0.5rem; }
+    .nav-bar {
+      position: fixed; right: 1rem; bottom: 0.85rem; z-index: 50; display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(18, 21, 29, 0.92); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 999px; padding: 0.35rem 0.6rem;
+    }
+    .nav-btn {
+      background: var(--bg-control); color: var(--text-primary); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.28rem 0.65rem; font-size: 0.75rem; font-family: inherit; font-weight: 500; cursor: pointer; text-decoration: none;
+    }
+    .nav-btn:hover { background: #eceef2; color: #0a0b0e; }
+    @media (max-width: 860px) { .split { grid-template-columns: 1fr; } .fig-frame { max-height: 38vh; } }
+  </style>
+</head>
+<body>
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="go(-1)">Prev</button>
+    <span id="counter" style="font-size:0.75rem; color:#9ba1ae; padding:0 0.35rem; font-variant-numeric:tabular-nums;">1 / 7</span>
+    <button class="nav-btn" onclick="go(1)">Next</button>
+    <a class="nav-btn" href="./SELENE_OPS_SpaceApps_2026_Presentation.pptx" download>Download PPTX</a>
+    <a class="nav-btn" href="./">Open App</a>
+  </div>
+
+  <main class="deck" id="deck">
+    <section class="slide">
+      <div class="split">
+        <div class="stack">
+          <div class="kicker">NASA Space Apps Challenge 2026</div>
+          <h1 class="title-font">SELENE OPS</h1>
+          <h2 style="color:var(--cyan); margin-top:0.3rem;">3D Selenographic Mission Readiness, Relay &amp; Rover Navigator</h2>
+          <p class="subtitle" style="line-height:1.55;">Unifying hybrid NASA LOLA South Pole elevation clipmaps (down to 10 m/px), live NASA Moon Trek WMTS streaming, 360° horizon ray-tracing, and A* rover pathfinding inside one 60 FPS workstation.</p>
+          <div class="kpi-row">
+            <div class="kpi"><strong style="color:var(--amber);">7</strong><span>Live GPU Physics Layers</span></div>
+            <div class="kpi"><strong style="color:var(--emerald);">10 m/px</strong><span>Site 01 Polar LOLA DEM</span></div>
+            <div class="kpi"><strong style="color:var(--cyan);">5</strong><span>Cislunar Relay Satellites</span></div>
+          </div>
+          <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);">github.com/AryanBanker07/luna_plana · Use arrow keys or scroll to navigate</div>
+        </div>
+        <div class="fig-frame"><img src="./slides/slide1_hero_composite.png" alt="SELENE OPS South Pole 3D View" /></div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 1 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">01 // The Engineering Problem</div>
+        <h2>Why Lunar South Pole Landings Fail Without Coupled Analysis</h2>
+        <p class="subtitle">Artemis and CLPS landers operate inside millimeter-tight solar, thermal, slope, and Earth-libration margins.</p>
+      </div>
+      <div class="split">
+        <div class="stack">
+          <div class="card"><h3>Grazing Sunlight (0° to 3° Incidence)</h3><p>Shifting just 2 km off Shackleton Connecting Ridge drops annual solar duty from 86.5% to 0% permanent darkness.</p></div>
+          <div class="card cyan"><h3>Cryogenic Cold Traps (25–45 K)</h3><p>Permanently Shadowed Regions store up to 5.5 wt% water ice alongside deep thermal survival hazards.</p></div>
+          <div class="card emerald"><h3>Touchdown Slope Limits (&gt;12° NO-GO)</h3><p>CLPS and HLS 4-leg landers require flat &lt;8° pads surrounded by 25°–32° inner crater walls.</p></div>
+          <div class="card red"><h3>27.2-Day Optical Libration (±6.68°)</h3><p>Earth dips behind crater rims for ~13 days every synodic cycle, blocking Direct-to-Earth links without relays.</p></div>
+        </div>
+        <div class="fig-frame"><img src="./slides/slide2_south_pole_constraints.png" alt="Shackleton Crater LOLA Profile" /></div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 2 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">02 // Hybrid Multi-Resolution Architecture</div>
+        <h2>10 m/px Local South Pole + Google Maps–Style Moon Trek WMTS</h2>
+        <p class="subtitle">Zero multi-gigabyte disk bloat while preserving polar stereographic displacement and 60 FPS interactivity.</p>
+      </div>
+      <div class="split">
+        <div class="stack">
+          <div class="card"><h3>3-Tier South Polar Stereographic Pyramid</h3><p>Algebraic polar projection (IAU2000:30162) removes pole pinching, combining LROC NAC 35 m/px, Artemis 75 m/px, and 16-bit LOLA DEMs down to 10 m/px at Site 01.</p></div>
+          <div class="card cyan"><h3>Live NASA Moon Trek OGC WMTS Streaming</h3><p>wmtsTileStreamer.ts fetches 256×256 global tiles (z=4..8) into a 4×4 RAM clipmap with a 192-tile LRU cache and parent-tile fallback.</p></div>
+          <div class="card emerald"><h3>Altitude-Adaptive Dynamic 3D Scaling</h3><p>All beacons, labels, waypoints, and the articulated 3D rover shrink cleanly to 18–20% close to the surface so fine craters stay unobstructed.</p></div>
+        </div>
+        <div class="fig-frame"><img src="./slides/slide3_hybrid_architecture.png" alt="Hybrid Terrain Architecture" /></div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 3 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">03 // GPU Shader Engine</div>
+        <h2>Seven Synchronized Multi-Physics Planetary Layers (60 FPS)</h2>
+        <p class="subtitle">Real-time WebGL shaders evaluate optical reflectance, LOLA topography, Diviner temperatures, slopes, lighting, ice, and comms.</p>
+      </div>
+      <div class="fig-frame" style="flex:1; min-height:0;"><img src="./slides/slide4_multi_physics_heatmaps.png" alt="7 Multi-Physics Heatmaps" /></div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 4 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">04 // Readiness &amp; Relay Tracking</div>
+        <h2>Transparent 100-Point Readiness Model &amp; Cislunar Constellation</h2>
+        <p class="subtitle">Explains exactly why a landing target is GO, CAUTION, or NO-GO at any past or future UTC mission epoch.</p>
+      </div>
+      <div class="split">
+        <div class="stack">
+          <div class="card emerald"><h3>GO (≥ 76/100) vs. Automatic NO-GO Rules</h3><p>Slope &gt;12°, solar eclipse (&lt;150 W/m²), or total DTE/relay blackout trigger automatic NO-GO status.</p></div>
+          <div class="card"><h3>Weighted Subsystem Breakdown (/100)</h3><p>Solar Power (/30) + Earth &amp; Relay Comms (/26) + Slope (/20) + Thermal 95–375 K (/14) + Ice/Solar Duty (/10).</p></div>
+          <div class="card cyan"><h3>36-Azimuth Horizon Ray-Tracing &amp; 5 Relays</h3><p>Ray-marches LOLA crater rims around a 2 m mast and propagates LRO, Danuri, Queqiao-2, CAPSTONE NRHO, and Pathfinder.</p></div>
+        </div>
+        <div class="fig-frame"><img src="./slides/slide5_readiness_and_relays.png" alt="Readiness Breakdown and Relays" /></div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 5 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">05 // Surface Mobility</div>
+        <h2>Singularity-Free Polar A* Rover Traverse &amp; Energy Planner</h2>
+        <p class="subtitle">Tangent-plane pathfinding routes safely around steep crater scarps and models net battery State-of-Charge.</p>
+      </div>
+      <div class="split">
+        <div class="stack">
+          <div class="card cyan"><h3>Gnomonic 43×31 Polar Grid</h3><p>Orthonormal tangent plane eliminates -90° longitude pinching with 16-direction transitions.</p></div>
+          <div class="card emerald"><h3>Soft-Barrier Slope Avoidance</h3><p>Penalizes steep inclines to keep traverses within rover climb envelopes vs. dangerous straight lines.</p></div>
+          <div class="card"><h3>Lunar Terramechanics Physics</h3><p>Integrates g = 1.625 m/s², slip losses, downhill regen, hotel load, and local-horizon solar recharge.</p></div>
+          <div class="card"><h3>Epoch-Synced Telemetry Exports</h3><p>Includes 3D animated rover playback and high-DPI interactive SVG/PNG telemetry plots.</p></div>
+        </div>
+        <div class="fig-frame"><img src="./slides/slide6_rover_traverse.png" alt="A* Rover Traverse & Plot" /></div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 6 / 7</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="header">
+        <div class="kicker">06 // Data Provenance &amp; Impact</div>
+        <h2>Anchored to Official Space Agency Data &amp; Open-Source WebGL</h2>
+        <p class="subtitle">Ready for Artemis III &amp; CLPS mission engineers, hackathon judges, and STEM lunar navigation outreach.</p>
+      </div>
+      <div class="split" style="grid-template-columns: 1.45fr 1fr;">
+        <div style="display:flex; align-items:center;">
+          <table>
+            <thead><tr><th>Dataset / Service</th><th>Agency / Source</th><th>Role in SELENE OPS</th></tr></thead>
+            <tbody>
+              <tr><td>NASA Moon Trek WMTS</td><td>NASA Solar System Treks</td><td>Live global 303 ppd WAC tile stream (z=4..8)</td></tr>
+              <tr><td>LOLA 16-bit Global &amp; Polar</td><td>NASA GSFC / MIT PDS</td><td>3D relief, slope gradients &amp; horizon masking</td></tr>
+              <tr><td>Artemis Site 01 (10 m/px)</td><td>NASA GSFC PGDA</td><td>Tactical crater-rim rover &amp; lander hazard DEM</td></tr>
+              <tr><td>LROC WAC / NAC Mosaics</td><td>ASU LROC QuickMap</td><td>35 m/px &amp; 75 m/px polar imagery + natural albedo</td></tr>
+              <tr><td>Diviner Radiometer (DLRE)</td><td>UCLA / NASA LRO</td><td>Bolometric temp calibration (25–395 K PSRs)</td></tr>
+              <tr><td>LPNS &amp; LEND Volatiles</td><td>NASA Lunar Prospector</td><td>Polar water-ice cold-trap concentrations</td></tr>
+              <tr><td>JPL Horizons &amp; CSA</td><td>NASA JPL / CSA</td><td>Ephemeris validation &amp; rover mobility bounds</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stack">
+          <div class="card cyan"><h3>Zero-Install Browser Stack</h3><p>React 18 · TypeScript · Three.js / WebGL · Tailwind CSS · Vite · Python PDS/PGDA tile pipeline.</p></div>
+          <div class="card emerald"><h3>Readable Mission-First Design</h3><p>Unified Space Grotesk + Plus Jakarta Sans typography, collapsible ribbon tabs, and clear GO/NO-GO scoring rules.</p></div>
+          <div class="card"><h3>Project Submission Assets</h3><p>Repo: github.com/AryanBanker07/luna_plana<br/>PowerPoint Deck: SELENE_OPS_SpaceApps_2026_Presentation.pptx</p></div>
+        </div>
+      </div>
+      <div class="footer"><span>SELENE OPS // NASA Space Apps 2026</span><span>Slide 7 / 7</span></div>
+    </section>
+  </main>
+
+  <script>
+    const deck = document.getElementById('deck');
+    const counter = document.getElementById('counter');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let idx = 0;
+    function updateCounter() {
+      idx = Math.round(deck.scrollTop / window.innerHeight);
+      counter.textContent = (idx + 1) + ' / ' + slides.length;
+    }
+    function go(delta) {
+      const next = Math.max(0, Math.min(slides.length - 1, idx + delta));
+      slides[next].scrollIntoView({ behavior: 'smooth' });
+    }
+    deck.addEventListener('scroll', () => requestAnimationFrame(updateCounter));
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+      else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+  </script>
+</body>
+</html>

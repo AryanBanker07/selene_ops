@@ -12,7 +12,10 @@ This note mirrors the repository root submission guide ([SPACEAPPS_SUBMISSION.md
 - **Public Code Repository:** `https://github.com/AryanBanker07/luna_plana`
 - **Challenge:** [Lunar Landing Site Navigator (NASA Space Apps 2026)](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)
 - **Allowed Demo Formats (pick one):**
-  1. **Slide Presentation:** Maximum **7 slides** (deck outline provided in `SPACEAPPS_SUBMISSION.md`)
+  1. **Slide Presentation (Generated & Ready):** Maximum **7 slides**
+     - PowerPoint (`.pptx`, `16:9` widescreen): [`SELENE_OPS_SpaceApps_2026_Presentation.pptx`](../SELENE_OPS_SpaceApps_2026_Presentation.pptx) & `/SELENE_OPS_SpaceApps_2026_Presentation.pptx`
+     - Interactive Browser Deck: [`public/presentation.html`](../public/presentation.html) (`/presentation.html`)
+     - High-DPI Slide Figures: [`public/slides/`](../public/slides/) (`slide1_hero_composite.png` .. `slide6_rover_traverse.png`) via [`scripts/generate_spaceapps_presentation.py`](../scripts/generate_spaceapps_presentation.py)
   2. **Video Pitch:** Maximum **30 seconds** (timed script + shot list provided in `SPACEAPPS_SUBMISSION.md`)
 - **Mandatory Judging Sections Covered:**
   - High-Level Project Summary (*What? How? Why important?*)
@@ -21,3 +24,4 @@ This note mirrors the repository root submission guide ([SPACEAPPS_SUBMISSION.md
   - Space Agency Data & Partner Attribution (`NASA Moon Trek WMTS`, `LRO LOLA PDS & GSFC PGDA`, `ASU LROC`, `Diviner DLRE`, `LPNS / LEND`, `JPL Horizons`, `CSA`)
   - Artificial Intelligence Disclosure
   - References & English-language / public-link verification
+

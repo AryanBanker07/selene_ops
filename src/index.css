@@ -16,9 +16,10 @@
   --status-go: #10b981;
   --status-caution: #e59934;
   --status-nogo: #ef4444;
+  --font-title: 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-mono: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 * {
@@ -39,12 +40,17 @@ body,
   -moz-osx-font-smoothing: grayscale;
 }
 
+.font-title {
+  font-family: var(--font-title);
+  letter-spacing: -0.02em;
+}
+
 .font-display {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
 }
 
 .font-mono-tech {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 

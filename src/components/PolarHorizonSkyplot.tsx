@@ -52,38 +52,38 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
   const earthPt = azElToXY(earth.azimuthDeg, earth.elevationDeg);
 
   return (
-    <div className="pt-2.5 border-t border-white/[0.07]">
+    <div className="pt-3 border-t border-white/[0.08]">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <div className="text-[11px] font-display uppercase tracking-[0.12em] text-slate-300 font-semibold">
-            Local Horizon & LOS Skyplot
+          <div className="text-xs font-semibold text-[#ECEEF2]">
+            Local Horizon &amp; Line-of-Sight Skyplot
           </div>
-          <div className="text-[10px] text-slate-400">
-            2 m Lander Mast • LOLA Terrain Mask
+          <div className="text-[11px] text-[#9BA1AE]">
+            2 m Lander Mast · LOLA Terrain Mask
           </div>
         </div>
-        <div className="flex items-center bg-[#070a11] p-0.5 rounded-md border border-white/10">
+        <div className="flex items-center bg-[#0A0B0E] p-0.5 rounded-md border border-white/[0.08]">
           <button
             type="button"
             onClick={() => setViewMode('polar')}
-            className={`hud-btn px-2 py-0.5 text-[10px] font-mono-tech rounded cursor-pointer ${
+            className={`hud-btn px-2 py-0.5 text-[11px] rounded cursor-pointer ${
               viewMode === 'polar'
-                ? 'bg-[#f59e0b]/20 text-[#fcd34d] border border-[#f59e0b]/40'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#ECEEF2] text-[#0A0B0E] font-medium'
+                : 'text-[#9BA1AE] hover:text-[#ECEEF2]'
             }`}
           >
-            DOME
+            Dome
           </button>
           <button
             type="button"
             onClick={() => setViewMode('panorama')}
-            className={`hud-btn px-2 py-0.5 text-[10px] font-mono-tech rounded cursor-pointer ${
+            className={`hud-btn px-2 py-0.5 text-[11px] rounded cursor-pointer ${
               viewMode === 'panorama'
-                ? 'bg-[#38bdf8]/20 text-[#7dd3fc] border border-[#38bdf8]/40'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#ECEEF2] text-[#0A0B0E] font-medium'
+                : 'text-[#9BA1AE] hover:text-[#ECEEF2]'
             }`}
           >
-            360° RIM
+            360° Rim
           </button>
         </div>
       </div>
@@ -163,16 +163,16 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
             />
 
             {/* Cardinal Labels */}
-            <text x={cx} y={13} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono">
+            <text x={cx} y={13} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
               N 0°
             </text>
-            <text x={210} y={cy + 3} textAnchor="end" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono">
+            <text x={210} y={cy + 3} textAnchor="end" fill="#94a3b8" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
               E
             </text>
-            <text x={cx} y={215} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono">
+            <text x={cx} y={215} textAnchor="middle" fill="#94a3b8" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
               S
             </text>
-            <text x={9} y={cy + 3} textAnchor="start" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono">
+            <text x={9} y={cy + 3} textAnchor="start" fill="#94a3b8" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
               W
             </text>
 
@@ -202,7 +202,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                         y={pt.y + 3}
                         fill={s.satellite.color}
                         fontSize="7.5"
-                        fontFamily="JetBrains Mono"
+                        fontFamily="Plus Jakarta Sans, sans-serif"
                       >
                         {s.satellite.id.slice(0, 3).toUpperCase()}
                       </text>
@@ -229,7 +229,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                   fill="#7dd3fc"
                   fontSize="8"
                   fontWeight="600"
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Plus Jakarta Sans, sans-serif"
                 >
                   ⊕
                 </text>
@@ -254,7 +254,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                   fill="#fde68a"
                   fontSize="8"
                   fontWeight="600"
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Plus Jakarta Sans, sans-serif"
                 >
                   ☉
                 </text>
@@ -315,7 +315,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                     strokeDasharray={el === 0 ? '3 2' : undefined}
                     strokeWidth="0.8"
                   />
-                  <text x={4} y={y - 2} fill="#64748b" fontSize="8" fontFamily="JetBrains Mono">
+                  <text x={4} y={y - 2} fill="#64748b" fontSize="8" fontFamily="Plus Jakarta Sans, sans-serif">
                     {el}°
                   </text>
                 </g>
@@ -353,7 +353,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                   textAnchor="middle"
                   fill="#fde68a"
                   fontSize="8.5"
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Plus Jakarta Sans, sans-serif"
                 >
                   ☉ {sun.elevationDeg}°
                 </text>
@@ -376,7 +376,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                   textAnchor="middle"
                   fill="#7dd3fc"
                   fontSize="8.5"
-                  fontFamily="JetBrains Mono"
+                  fontFamily="Plus Jakarta Sans, sans-serif"
                 >
                   ⊕ {earth.elevationDeg}°
                 </text>
@@ -398,7 +398,7 @@ export const PolarHorizonSkyplot: React.FC<PolarHorizonSkyplotProps> = ({
                 textAnchor={t.az === 0 ? 'start' : t.az === 355 ? 'end' : 'middle'}
                 fill="#94a3b8"
                 fontSize="8.5"
-                fontFamily="JetBrains Mono"
+                fontFamily="Plus Jakarta Sans, sans-serif"
               >
                 {t.lbl}
               </text>

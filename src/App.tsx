@@ -8,11 +8,9 @@ import {
   ChevronUp,
   Compass,
   Crosshair,
-  Download,
   Eye,
   Flame,
   Globe,
-  Home,
   Layers,
   MapPin,
   Maximize2,
@@ -25,7 +23,6 @@ import {
   Route,
   Satellite,
   ShieldAlert,
-  SlidersHorizontal,
   Sun,
   TriangleAlert,
   X,
@@ -743,52 +740,6 @@ export function App() {
     setCustomLonInput(lon.toFixed(2));
   };
 
-  const handleExportBriefJson = () => {
-    const payload = {
-      generatedBy: 'SELENE OPS — NASA Space Apps 2026 Lunar Landing Site Navigator',
-      epochUtc: new Date(simTimeMs).toISOString(),
-      landingSite: evaluation.site,
-      readiness: {
-        overallStatus: evaluation.overallStatus,
-        score: evaluation.readinessScore,
-        flightRules: evaluation.flightRules,
-      },
-      environment: {
-        elevationKm: evaluation.elevationKm,
-        slopeDeg: evaluation.slopeDeg,
-        surfaceTempK: evaluation.surfaceTempK,
-        annualIlluminationPct: evaluation.illuminationDutyPct,
-        waterIceWtPct: evaluation.waterIceWtPct,
-        sunHorizontal: evaluation.sun,
-        earthHorizontal: evaluation.earth,
-      },
-      visibleSatellites: evaluation.activeSatellites
-        .filter((s) => s.isVisibleFromSite)
-        .map((s) => ({
-          name: s.satellite.name,
-          altKm: s.altKm,
-          elevationDeg: s.elevationDeg,
-          azimuthDeg: s.azimuthDeg,
-          slantRangeKm: s.slantRangeKm,
-          dataRateMbps: s.instantDataRateMbps,
-          capabilities: s.satellite.capabilities,
-        })),
-      next24hPassesCount: upcomingPasses.length,
-      recommendedWindows: optimalWindows,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `selene-ops-${evaluation.site.id}-${new Date(simTimeMs)
-      .toISOString()
-      .slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const epochUtcParts = formatUtcParts(simTimeMs);
   const epochRelDelta = formatRelativeEpochDelta(simTimeMs);
 
@@ -801,6 +752,54 @@ export function App() {
     evaluation.activeSatellites[0];
 
   const overallBadge = statusStyle(evaluation.overallStatus);
+
+  const ruleStatusMap = Object.fromEntries(
+    evaluation.flightRules.map((fr) => [fr.id, fr.status])
+  );
+  const readinessBreakdown = [
+    {
+      label: 'Solar Power',
+      rule: 'Sun clears local horizon; >=450 W/m² full, >=150 W/m² partial',
+      points:
+        ruleStatusMap.power === 'GO' ? 30 : ruleStatusMap.power === 'CAUTION' ? 16 : 2,
+      max: 30,
+      status: ruleStatusMap.power || 'CAUTION',
+    },
+    {
+      label: 'Earth & Relay Comms',
+      rule: 'Direct-to-Earth >=3° above crater rim or orbital relay in view',
+      points:
+        ruleStatusMap.comms === 'GO' ? 26 : ruleStatusMap.comms === 'CAUTION' ? 19 : 0,
+      max: 26,
+      status: ruleStatusMap.comms || 'CAUTION',
+    },
+    {
+      label: 'Touchdown Slope',
+      rule: '<=8° safe 4-leg landing; 8-12° marginal; >12° automatic NO-GO',
+      points:
+        ruleStatusMap.slope === 'GO' ? 20 : ruleStatusMap.slope === 'CAUTION' ? 11 : 2,
+      max: 20,
+      status: ruleStatusMap.slope || 'CAUTION',
+    },
+    {
+      label: 'Surface Thermal',
+      rule: '95-375 K nominal operating band; <55 K or >392 K extreme stress',
+      points:
+        ruleStatusMap.thermal === 'GO' ? 14 : ruleStatusMap.thermal === 'CAUTION' ? 8 : 3,
+      max: 14,
+      status: ruleStatusMap.thermal || 'CAUTION',
+    },
+    {
+      label: 'Ice & Solar Bonus',
+      rule: 'Nearby water-ice prospect (wt%) + annual polar solar duty cycle',
+      points: Math.min(
+        10,
+        Math.round(evaluation.waterIceWtPct * 2 + (evaluation.illuminationDutyPct / 100) * 5)
+      ),
+      max: 10,
+      status: 'GO' as const,
+    },
+  ];
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#05070b] space-grid-overlay text-slate-100">
@@ -888,8 +887,7 @@ export function App() {
               title="Return to SELENE Mission Launcher"
             >
               <Compass className="w-3.5 h-3.5 text-[#E59934]" />
-              <span className="font-semibold text-xs tracking-wide">SELENE</span>
-              <Home className="w-3 h-3 text-[#9BA1AE]" />
+              <span className="font-title font-bold text-xs tracking-wide">SELENE</span>
             </button>
 
             {/* 4-View Celestial & Polar Frame Pills (Unified Neutral Active State) */}
@@ -939,40 +937,32 @@ export function App() {
                   {
                     id: 'sites' as const,
                     label: 'Sites',
-                    badge: evaluation.site.name.split(' ')[0],
                     icon: <MapPin className="w-3.5 h-3.5" />,
                   },
                   {
                     id: 'layers' as const,
                     label: 'Layers',
-                    badge: activeHeatmapConfig.shortLabel,
                     icon: <Layers className="w-3.5 h-3.5" />,
                   },
                   {
                     id: 'readiness' as const,
                     label: 'Readiness',
-                    badge: `${evaluation.overallStatus} ${evaluation.readinessScore}`,
-                    badgeTone:
+                    statusDot:
                       evaluation.overallStatus === 'GO'
-                        ? 'text-emerald-400'
+                        ? 'bg-emerald-400'
                         : evaluation.overallStatus === 'CAUTION'
-                        ? 'text-amber-400'
-                        : 'text-rose-400',
+                        ? 'bg-amber-400'
+                        : 'bg-rose-400',
                     icon: <Activity className="w-3.5 h-3.5" />,
                   },
                   {
                     id: 'orbits' as const,
                     label: 'Orbits',
-                    badge: `${evaluation.visibleRelays.length}/4`,
                     icon: <Satellite className="w-3.5 h-3.5" />,
                   },
                   {
                     id: 'rover' as const,
                     label: 'Rover',
-                    badge:
-                      roverWorkflowStep !== 'idle'
-                        ? `${roverPlan.totalDistanceKm.toFixed(1)}km`
-                        : undefined,
                     icon: <Route className="w-3.5 h-3.5" />,
                   },
                   {
@@ -1001,14 +991,8 @@ export function App() {
                     >
                       {tab.icon}
                       <span>{tab.label}</span>
-                      {tab.badge && (
-                        <span
-                          className={`hidden 2xl:inline font-mono-tech text-[10.5px] ${
-                            isActive ? 'text-[#0A0B0E]/75' : tab.badgeTone || 'text-[#6C7280]'
-                          }`}
-                        >
-                          {tab.badge}
-                        </span>
+                      {'statusDot' in tab && tab.statusDot && (
+                        <span className={`w-1.5 h-1.5 rounded-full ${tab.statusDot}`} />
                       )}
                     </button>
                   );
@@ -1105,34 +1089,6 @@ export function App() {
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsSunEarthModalOpen(true)}
-                className="hud-btn hidden md:flex items-center gap-1 px-2 py-1 rounded-md bg-[#181B22] hover:bg-[#1C2029] border border-white/[0.08] text-xs text-[#9BA1AE] hover:text-[#ECEEF2] cursor-pointer"
-                title="Target WRT Sun & Earth"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Sun/Earth</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCompareOpen(true)}
-                className="hud-btn hidden md:flex items-center gap-1 px-2 py-1 rounded-md bg-[#181B22] hover:bg-[#1C2029] border border-white/[0.08] text-xs text-[#9BA1AE] hover:text-[#ECEEF2] cursor-pointer"
-                title="Compare Two Landing Sites"
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleExportBriefJson}
-                className="hud-btn hidden lg:flex items-center px-2 py-1 rounded-md bg-[#181B22] hover:bg-[#1C2029] border border-white/[0.08] text-xs text-[#9BA1AE] hover:text-[#ECEEF2] cursor-pointer"
-                title="Export JSON Telemetry Package"
-              >
-                <Download className="w-3.5 h-3.5" />
-              </button>
-
               {!zenMode && (
                 <button
                   type="button"
@@ -1192,35 +1148,6 @@ export function App() {
                         </button>
                       );
                     })}
-                  </div>
-
-                  {/* Inline Compact Colorbar */}
-                  <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-white/[0.08] font-mono-tech text-[11px] text-[#9BA1AE]">
-                    <span>{activeHeatmapConfig.minLabel}</span>
-                    <div
-                      className="w-24 h-1.5 rounded-full border border-white/10"
-                      style={{ background: activeHeatmapConfig.gradientCss }}
-                      title={`${activeHeatmapConfig.label} (${activeHeatmapConfig.unit})`}
-                    />
-                    <span>{activeHeatmapConfig.maxLabel}</span>
-                  </div>
-
-                  {/* Inline 3D Relief */}
-                  <div className="hidden 2xl:flex items-center gap-1.5 pl-3 border-l border-white/[0.08]">
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-[#9BA1AE]" />
-                    <span className="text-[11px] text-[#9BA1AE]">Relief</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={3.2}
-                      step={0.1}
-                      value={terrainExaggeration}
-                      onChange={(e) => setTerrainExaggeration(Number(e.target.value))}
-                      className="w-16 accent-[#E59934] cursor-pointer"
-                    />
-                    <span className="font-mono-tech text-[11px] text-[#ECEEF2] w-7">
-                      {terrainExaggeration.toFixed(1)}×
-                    </span>
                   </div>
 
                   {/* Camera Presets Co-Located Beside Layer Controls */}
@@ -1990,9 +1917,65 @@ export function App() {
                   </div>
                 </div>
 
+                {/* What Readiness Means & Live 100-Point Breakdown */}
+                <div className="p-3 rounded-lg bg-[#0A0B0E] border border-white/[0.08] space-y-2.5">
+                  <div>
+                    <div className="text-xs font-semibold text-[#ECEEF2]">
+                      What Readiness Means ({evaluation.readinessScore}/100)
+                    </div>
+                    <p className="text-xs text-[#9BA1AE] mt-1 leading-relaxed">
+                      Readiness measures whether a lander can safely touch down and operate at the active date and coordinate across 5 weighted subsystems.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5 text-[11px] leading-snug">
+                    <div className="p-2 rounded bg-[#111318] border border-emerald-500/25">
+                      <div className="font-semibold text-emerald-300">GO (≥ 76)</div>
+                      <div className="text-[#9BA1AE] mt-0.5">All critical rules met</div>
+                    </div>
+                    <div className="p-2 rounded bg-[#111318] border border-amber-500/25">
+                      <div className="font-semibold text-amber-300">CAUTION (&lt; 76)</div>
+                      <div className="text-[#9BA1AE] mt-0.5">Marginal power or relay</div>
+                    </div>
+                    <div className="p-2 rounded bg-[#111318] border border-rose-500/25">
+                      <div className="font-semibold text-rose-300">NO-GO</div>
+                      <div className="text-[#9BA1AE] mt-0.5">Slope &gt;12°, eclipse, or blackout</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+                    {readinessBreakdown.map((item) => {
+                      const pct = Math.round((item.points / item.max) * 100);
+                      const barColor =
+                        item.status === 'GO'
+                          ? 'bg-emerald-400'
+                          : item.status === 'CAUTION'
+                          ? 'bg-amber-400'
+                          : 'bg-rose-400';
+                      return (
+                        <div key={item.label} title={item.rule}>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[#ECEEF2] font-medium">{item.label}</span>
+                            <span className="font-mono-tech text-[#9BA1AE]">
+                              <strong className="text-[#ECEEF2]">{item.points}</strong> / {item.max} pts
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden mt-1">
+                            <div
+                              className={`h-full rounded-full ${barColor}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <div className="text-[11px] text-[#6C7280] mt-0.5">{item.rule}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div>
                   <div className="text-xs font-semibold text-[#ECEEF2] mb-2">
-                    Flight-Rule Checks
+                    Live Subsystem Flight Rules
                   </div>
                   <div className="space-y-1.5">
                     {evaluation.flightRules.map((fr) => {
@@ -2001,7 +1984,6 @@ export function App() {
                         <div
                           key={fr.id}
                           className="p-2.5 rounded-lg bg-[#0A0B0E] border border-white/[0.07]"
-                          title={fr.detail}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 min-w-0">
@@ -2010,11 +1992,11 @@ export function App() {
                                 {fr.label}
                               </span>
                             </div>
-                            <span className="text-[11px] font-mono-tech text-[#ECEEF2] shrink-0">
+                            <span className="text-xs font-mono-tech font-medium text-[#ECEEF2] shrink-0">
                               {fr.valueText}
                             </span>
                           </div>
-                          <div className="text-[11px] text-[#9BA1AE] mt-1 pl-5 leading-snug">
+                          <div className="text-xs text-[#9BA1AE] mt-1 pl-5 leading-snug">
                             {fr.detail}
                           </div>
                         </div>
@@ -2033,8 +2015,6 @@ export function App() {
                 />
 
                 <AiMissionAdvisor
-                  evaluation={evaluation}
-                  passes={upcomingPasses}
                   optimalWindows={optimalWindows}
                   onJumpToTime={(ms) => handleApplyMissionTime(ms, true, true)}
                 />
@@ -2202,7 +2182,6 @@ export function App() {
       {showLandingPage && (
         <LandingPageHero
           curatedSites={CURATED_LANDING_SITES}
-          epochDisplay={`${epochUtcParts.dateStr} ${epochUtcParts.timeStr}`}
           onEnterConsole={() => setShowLandingPage(false)}
           onLaunchSouthPole={() => {
             setShowLandingPage(false);
@@ -2214,12 +2193,6 @@ export function App() {
           onLaunchRoverPlanner={() => {
             setShowLandingPage(false);
             handleOpenPlanMission();
-          }}
-          onLaunchLayer={(mode) => {
-            setShowLandingPage(false);
-            setHeatmapMode(mode);
-            setViewMode('lunar-globe');
-            setActiveRibbonTab('layers');
           }}
           onLaunchSite={(site) => {
             setShowLandingPage(false);
