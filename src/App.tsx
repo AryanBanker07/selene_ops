@@ -11,6 +11,7 @@ import {
   Eye,
   Flame,
   Globe,
+  HelpCircle,
   Layers,
   MapPin,
   Maximize2,
@@ -70,6 +71,10 @@ import {
   RoverElevationDrawer,
 } from './components/RoverMissionPlanner';
 import { LandingPageHero } from './components/LandingPageHero';
+import {
+  FeatureWizardModal,
+  WizardStepAction,
+} from './components/FeatureWizardModal';
 import {
   ActiveTimeWarpState,
   CandidateCorridorPath,
@@ -216,6 +221,7 @@ export function App() {
   } | null>(null);
   const [activeWarp, setActiveWarp] = useState<ActiveTimeWarpState | null>(null);
   const [zenMode, setZenMode] = useState<boolean>(false);
+  const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
 
   const simTimeRef = useRef<number>(simTimeMs);
   simTimeRef.current = simTimeMs;
@@ -310,7 +316,7 @@ export function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (isEpochModalOpen || isCompareOpen || isSunEarthModalOpen) return;
+      if (isEpochModalOpen || isCompareOpen || isSunEarthModalOpen || isWizardOpen) return;
       if (activeWarp) {
         setActiveWarp(null);
         setIsPlaying(false);
@@ -321,7 +327,7 @@ export function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [warpSessionKey, activeWarp, activeRibbonTab, isEpochModalOpen, isCompareOpen, isSunEarthModalOpen]);
+  }, [warpSessionKey, activeWarp, activeRibbonTab, isEpochModalOpen, isCompareOpen, isSunEarthModalOpen, isWizardOpen]);
 
   // Keep 30-day timeline window centered/anchored if user jumps far outside [anchor, anchor + 30d]
   useEffect(() => {
@@ -740,6 +746,41 @@ export function App() {
     setCustomLonInput(lon.toFixed(2));
   };
 
+  const handleWizardStepAction = (action: WizardStepAction) => {
+    setZenMode(false);
+    if (action.viewMode) {
+      setViewMode(action.viewMode);
+      if (action.viewMode === 'south-pole') {
+        setCameraPreset(
+          action.focusSouthPole || selectedSite.lat <= -88.8 ? 'sp-shackleton' : 'sp-overview'
+        );
+        setCameraNonce((n) => n + 1);
+      } else if (action.viewMode === 'earth-moon') {
+        setAstroPreset('em-overview');
+        setAstroNonce((n) => n + 1);
+      } else if (action.viewMode === 'heliocentric') {
+        setAstroPreset('helio-overview');
+        setAstroNonce((n) => n + 1);
+      }
+    }
+    if (action.focusSouthPole) {
+      setViewMode('south-pole');
+      setSelectedSite(CURATED_LANDING_SITES[0]);
+      setCameraPreset('sp-shackleton');
+      setCameraNonce((n) => n + 1);
+    }
+    if (action.heatmapMode) {
+      setHeatmapMode(action.heatmapMode);
+    }
+    if (action.startRoverPlanner) {
+      setRoverActive(true);
+      setRoverWorkflowStep((prev) => (prev === 'idle' ? 'rover-setup' : prev));
+    }
+    if (action.openTab) {
+      setActiveRibbonTab(action.openTab);
+    }
+  };
+
   const epochUtcParts = formatUtcParts(simTimeMs);
   const epochRelDelta = formatRelativeEpochDelta(simTimeMs);
 
@@ -1088,6 +1129,24 @@ export function App() {
                   onCancelWarp={handleCancelWarp}
                 />
               </div>
+
+              <button
+                type="button"
+                onClick={() => setIsWizardOpen((v) => !v)}
+                className={`hud-btn px-2 py-1 rounded-md border text-xs font-medium flex items-center gap-1.5 cursor-pointer ${
+                  isWizardOpen
+                    ? 'bg-[#ECEEF2] text-[#0A0B0E] border-[#ECEEF2] font-semibold'
+                    : 'bg-[#181B22] hover:bg-[#1C2029] border-white/[0.08] text-[#ECEEF2]'
+                }`}
+                title="Open 5-Step Feature Guide"
+              >
+                <HelpCircle
+                  className={`w-3.5 h-3.5 ${
+                    isWizardOpen ? 'text-[#0A0B0E]' : 'text-[#E59934]'
+                  }`}
+                />
+                <span className="hidden sm:inline">Guide</span>
+              </button>
 
               {!zenMode && (
                 <button
@@ -2206,8 +2265,26 @@ export function App() {
             setAstroPreset(mode === 'earth-moon' ? 'em-overview' : 'helio-overview');
             setAstroNonce((n) => n + 1);
           }}
+          onLaunchWizard={() => {
+            setShowLandingPage(false);
+            setViewMode('south-pole');
+            setSelectedSite(CURATED_LANDING_SITES[0]);
+            setCameraPreset('sp-shackleton');
+            setCameraNonce((n) => n + 1);
+            setActiveRibbonTab('sites');
+            setIsWizardOpen(true);
+          }}
         />
       )}
+
+      {/* 5-STEP FEATURE GUIDE WIZARD */}
+      <FeatureWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        onApplyStepAction={handleWizardStepAction}
+        currentHeatmap={heatmapMode}
+        currentViewMode={viewMode}
+      />
 
       {/* SIDE-BY-SIDE SITE & LAUNCH-SLIP COMPARISON MODAL */}
       <SiteComparisonModal
